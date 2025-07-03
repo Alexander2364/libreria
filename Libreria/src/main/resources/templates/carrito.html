@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="banner::layout(~{::section})">
+
+<head>
+    <title>Carrito de Compras</title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <section class="container py-5">
+        <h2 class="text-center mb-4">🛒 Carrito de Compras</h2>
+
+        <div th:if="${#lists.isEmpty(carrito)}" class="alert alert-warning text-center">
+            Tu carrito está vacío. <a th:href="@{/productos}" class="alert-link">¡Explora productos!</a>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(carrito)}">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Subtotal</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${carrito}">
+                            <td th:text="${item.producto.nombre}">Nombre</td>
+                            <td>S/. <span th:text="${item.producto.precio}">0.00</span></td>
+                            <td>
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <a th:href="@{'/carrito/disminuir/' + ${item.producto.id}}"
+                                        class="btn btn-outline-secondary btn-sm me-2">−</a>
+                                    <span th:text="${item.cantidad}">1</span>
+                                    <a th:href="@{'/carrito/aumentar/' + ${item.producto.id}}"
+                                        class="btn btn-outline-secondary btn-sm ms-2">+</a>
+                                </div>
+                            </td>
+                            <td>S/. <span th:text="${item.subtotal}">0.00</span></td>
+                            <td>
+                                <a th:href="@{'/carrito/eliminar/' + ${item.producto.id}}"
+                                    class="btn btn-sm btn-danger">🗑 Eliminar</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <h4>Total: <span class="text-primary">S/. <span th:text="${total}">0.00</span></span></h4>
+
+                <form th:action="@{/carrito/confirmar}" method="post">
+                    <button type="submit" class="btn btn-success btn-lg">✅ Confirmar Compra</button>
+                </form>
+            </div>
+
+            <div class="text-end mt-3">
+                <a th:href="@{/productos}" class="btn btn-outline-secondary">← Seguir Comprando</a>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:replace="baseintranet::layout(~{::section})">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Productos</title>
+</head>
+<body>
+  <section>
+    <main id="page-content-wrapper">
+      <div class="container-fluid">
+        <h2>Lista de Productos</h2>
+        <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#modalNuevoProducto">Agregar Producto</button>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Nro</th>
+                <th>Código</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Precio</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="p : ${lista}">
+                <td th:text="${p.id}"></td>
+                <td th:text="${p.codigo}"></td>
+                <td th:text="${p.nombre}"></td>
+                <td th:text="${p.descripcion}"></td>
+                <td th:text="${p.categoria != null ? p.categoria.nombre : 'Sin categoría'}"></td>
+                <td th:text="${p.precio}"></td>
+                <td><img th:src="@{'/imagenes/' + ${p.imagen}}" alt="Imagen" width="100"/></td>
+                <td>
+                  <button 
+                    class="btn btn-primary btn-sm"
+                    data-bs-toggle="modal" 
+                    data-bs-target="#modalEditarProducto"
+                    th:attr="data-id=${p.id}, data-nombre=${p.nombre}, data-descripcion=${p.descripcion}, data-precio=${p.precio}, data-imagen=${p.imagen}, data-categoria-id=${p.categoria?.id}"
+                    onclick="llenarModalEditar(this)">
+                    Editar
+                  </button>
+                  <a th:href="@{/producto/eliminar/{id}(id=${p.id})}" class="btn btn-danger btn-sm"
+                     onclick="return confirm('¿Estás seguro de eliminar este producto?')">Eliminar</a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal Nuevo Producto -->
+    <div class="modal fade" id="modalNuevoProducto" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form th:action="@{/guardarpro}" th:object="${producto}" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="modal-header">
+              <h5 class="modal-title">Nuevo Producto</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" th:field="*{nombre}" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label>Descripción</label>
+                <textarea th:field="*{descripcion}" class="form-control" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label>Precio</label>
+                <input type="number" th:field="*{precio}" step="0.01" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label>Imagen</label>
+                <input type="file" name="file" class="form-control" accept="image/*" required />
+              </div>
+              <div class="mb-3">
+                <label for="categoriaSelect" class="form-label">Categoría</label>
+                <select id="categoriaSelect" th:field="*{categoria}" class="form-select" required>
+                  <option value="" th:selected="*{categoria} == null">Seleccione una categoría</option>
+                  <option th:each="c : ${categorias}"
+                          th:value="${c.id}"
+                          th:text="${c.nombre}"
+                          th:selected="*{categoria != null} ? ${c.id} == *{categoria.id} : false">
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Guardar</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Editar Producto -->
+    <div class="modal fade" id="modalEditarProducto" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="formEditar" method="post" enctype="multipart/form-data">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="modal-header">
+              <h5 class="modal-title">Editar Producto</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" name="id" id="editarId">
+              <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" name="nombre" id="editarNombre" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label>Descripción</label>
+                <textarea name="descripcion" id="editarDescripcion" class="form-control" required></textarea>
+              </div>
+              <div class="mb-3">
+                <label for="editarCategoria" class="form-label">Categoría</label>
+                <select id="editarCategoria" name="categoria.id" class="form-select" required>
+                  <option value="" disabled>Seleccione una categoría</option>
+                  <option th:each="c : ${categorias}"
+                          th:value="${c.id}"
+                          th:text="${c.nombre}">
+                  </option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label>Precio</label>
+                <input type="number" name="precio" id="editarPrecio" step="0.01" class="form-control" required />
+              </div>
+              <div class="mb-3">
+                <label>Imagen actual</label><br>
+                <img id="editarVistaImagen" src="" alt="Imagen actual" width="100" class="border rounded mb-2"/>
+              </div>
+              <div class="mb-3">
+                <label>Cambiar imagen</label>
+                <input type="file" name="file" class="form-control" accept="image/*" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Guardar Cambios</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Script para llenar modal de edición -->
+    <script>
+      function llenarModalEditar(btn) {
+        const id = btn.getAttribute("data-id");
+        const nombre = btn.getAttribute("data-nombre");
+        const descripcion = btn.getAttribute("data-descripcion");
+        const precio = btn.getAttribute("data-precio");
+        const imagen = btn.getAttribute("data-imagen");
+        const categoriaId = btn.getAttribute("data-categoria-id");
+
+        document.getElementById("editarId").value = id;
+        document.getElementById("editarNombre").value = nombre;
+        document.getElementById("editarDescripcion").value = descripcion;
+        document.getElementById("editarPrecio").value = precio;
+        document.getElementById("editarVistaImagen").src = imagen ? "/imagenes/" + imagen : "";
+
+        const selectCategoria = document.getElementById("editarCategoria");
+        if (categoriaId && selectCategoria) {
+          selectCategoria.value = categoriaId;
+        }
+
+        document.getElementById("formEditar").setAttribute("action", `/producto/actualizar/${id}`);
+      }
+    </script>
+  </section>
+</body>
+</html>

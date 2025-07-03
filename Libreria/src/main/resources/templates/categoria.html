@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="baseintranet::layout(~{::section})">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Categorías</title>
+</head>
+
+<body>
+<section>
+  <main id="page-content-wrapper">
+    <div class="container-fluid">
+      <h2>Gestión de Categorías</h2>
+      <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#modalNuevaCategoria">Agregar Categoría</button>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="c : ${lista}">
+              <td th:text="${c.id}"></td>
+              <td th:text="${c.nombre}"></td>
+              <td th:text="${c.descripcion}"></td>
+              <td>
+                <button 
+                  class="btn btn-primary btn-sm"
+                  data-bs-toggle="modal" 
+                  data-bs-target="#modalEditarCategoria"
+                  th:attr="data-id=${c.id}, data-nombre=${c.nombre}, data-descripcion=${c.descripcion}"
+                  onclick="llenarModalEditarCategoria(this)">
+                  Editar
+                </button>
+                <a th:href="@{/categoria/eliminar/{id}(id=${c.id})}" class="btn btn-danger btn-sm"
+                   onclick="return confirm('¿Estás seguro de eliminar esta categoría?')">Eliminar</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal Nueva Categoría -->
+  <div class="modal fade" id="modalNuevaCategoria" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form th:action="@{/categoria/guardar}" th:object="${categoria}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <div class="modal-header">
+            <h5 class="modal-title">Nueva Categoría</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label>Nombre</label>
+              <input type="text" th:field="*{nombre}" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label>Descripción</label>
+              <textarea th:field="*{descripcion}" class="form-control" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Categoría -->
+  <div class="modal fade" id="modalEditarCategoria" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form id="formEditarCategoria" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Categoría</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" name="id" id="editarCategoriaId">
+            <div class="mb-3">
+              <label>Nombre</label>
+              <input type="text" name="nombre" id="editarCategoriaNombre" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label>Descripción</label>
+              <textarea name="descripcion" id="editarCategoriaDescripcion" class="form-control" required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar Cambios</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function llenarModalEditarCategoria(btn) {
+      const id = btn.getAttribute("data-id");
+      const nombre = btn.getAttribute("data-nombre");
+      const descripcion = btn.getAttribute("data-descripcion");
+
+      document.getElementById("editarCategoriaId").value = id;
+      document.getElementById("editarCategoriaNombre").value = nombre;
+      document.getElementById("editarCategoriaDescripcion").value = descripcion;
+
+      document.getElementById("formEditarCategoria").setAttribute("action", `/categoria/actualizar/${id}`);
+    }
+  </script>
+</section>
+</body>
+</html>

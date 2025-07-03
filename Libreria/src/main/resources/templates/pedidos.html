@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" th:replace="baseintranet::layout(~{::section})">
+<head>
+  <meta charset="UTF-8">
+  <title>Pedidos de Clientes</title>
+</head>
+<body>
+<section>
+  <main id="page-content-wrapper">
+    <div class="container-fluid">
+      <h2 class="mb-4">Pedidos de Clientes</h2>
+      <!-- Buscador por código -->
+<form th:action="@{/pedidos/buscar}" method="get" class="row mb-3">
+  <div class="col-md-4">
+    <input type="text" name="filtro" class="form-control" placeholder="Buscar por nombre, código o fecha...">
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </div>
+</form>
+
+
+
+<!-- Mensaje si no se encontraron resultados -->
+<div th:if="${#lists.isEmpty(pedidos)}" class="alert alert-warning">
+    No se encontraron pedidos con ese código.
+</div>
+
+      <div class="accordion" id="accordionPedidos">
+        <div th:each="pedido : ${pedidos}" class="accordion-item mb-2">
+          <h2 class="accordion-header" th:id="'heading' + ${pedido.id}">
+            <button class="accordion-button collapsed" type="button"
+                    data-bs-toggle="collapse"
+                    th:data-bs-target="'#collapse' + ${pedido.id}"
+                    aria-expanded="false"
+                    th:aria-controls="'collapse' + ${pedido.id}">
+              Pedido-<strong th:text="${pedido.codigo}">Código</strong> - 
+              <span th:text="${pedido.usuario?.nombre}">Cliente</span> |
+              Fecha: <span th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm:ss')}">Fecha</span> |
+              Total: S/.<span th:text="${pedido.total}">0.00</span>
+            </button>
+          </h2>
+          <div th:id="'collapse' + ${pedido.id}" class="accordion-collapse collapse"
+               th:aria-labelledby="'heading' + ${pedido.id}" data-bs-parent="#accordionPedidos">
+            <div class="accordion-body">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <strong>Estado actual:</strong>
+                  <span class="badge bg-info" th:text="${pedido.estado}">Estado</span>
+                </div>
+                <div class="col-md-6 text-end">
+                  <form th:action="@{/pedidos/estado}" method="post" class="d-inline">
+                    <input type="hidden" name="id" th:value="${pedido.id}" />
+                    <input type="hidden" name="estado" value="En proceso" />
+                    <button type="submit" class="btn btn-warning btn-sm me-1"
+                            th:disabled="${pedido.estado == 'En proceso'}">En proceso</button>
+                  </form>
+                  <form th:action="@{/pedidos/estado}" method="post" class="d-inline">
+                    <input type="hidden" name="id" th:value="${pedido.id}" />
+                    <input type="hidden" name="estado" value="Entregado" />
+                    <button type="submit" class="btn btn-success btn-sm me-1"
+                            th:disabled="${pedido.estado == 'Entregado'}">Entregado</button>
+                  </form>
+                  <form th:action="@{/pedidos/estado}" method="post" class="d-inline">
+                    <input type="hidden" name="id" th:value="${pedido.id}" />
+                    <input type="hidden" name="estado" value="Cancelado" />
+                    <button type="submit" class="btn btn-danger btn-sm"
+                            th:disabled="${pedido.estado == 'Cancelado'}">Cancelado</button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Producto</th>
+                      <th>Precio</th>
+                      <th>Cantidad</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr th:each="detalle : ${pedido.detalles}">
+                      <td th:text="${detalle.producto.nombre}">Producto</td>
+                      <td th:text="${detalle.precioUnitario}">0.00</td>
+                      <td th:text="${detalle.cantidad}">0</td>
+                      <td th:text="${detalle.subtotal}">0.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</section>
+</body>
+</html>

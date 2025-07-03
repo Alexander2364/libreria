@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="banner::layout(~{::section})">
+<head>
+    <meta charset="UTF-8">
+    <title>Historial de Compras</title>
+</head>
+<body>
+<section class="container py-5">
+    <h2 class="text-center mb-4">🧾 Historial de Compras</h2>
+
+    <div th:if="${#lists.isEmpty(historial)}" class="alert alert-info text-center">
+        Aún no has realizado compras.
+    </div>
+
+    <div th:if="${!#lists.isEmpty(historial)}">
+        <div class="accordion" id="accordionPedidos">
+            <div th:each="pedido, iter : ${historial}" class="accordion-item mb-3">
+                <h2 class="accordion-header" id="heading_{iter.index}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+        th:data-bs-target="'#collapse_' + ${iter.index}" aria-expanded="false"
+        th:aria-controls="'collapse_' + ${iter.index}">
+    Pedido #[[${pedido.id}]] - [[${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}]]
+</button>
+
+                </h2>
+                <div th:id="'collapse_' + ${iter.index}" class="accordion-collapse collapse"
+                     th:aria-labelledby="'heading_' + ${iter.index}" data-bs-parent="#accordionPedidos">
+                    <div class="accordion-body">
+                        <table class="table table-bordered text-center">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="detalle : ${pedido.detalles}">
+                                    <td th:text="${detalle.producto.nombre}">Nombre</td>
+                                    <td th:text="${detalle.cantidad}">1</td>
+                                    <td>S/. <span th:text="${detalle.precioUnitario}">0.00</span></td>
+                                    <td>S/. <span th:text="${detalle.subtotal}">0.00</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="text-end fw-bold">Total: S/. <span th:text="${pedido.total}">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

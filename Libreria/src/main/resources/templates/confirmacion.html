@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="banner::layout(~{::section})">
+<head>
+    <meta charset="UTF-8">
+    <title>Compra Confirmada</title>
+</head>
+<body>
+<section class="container py-5">
+    <div class="text-center mb-4">
+        <h2 class="text-success">✅ ¡Compra realizada con éxito!</h2>
+        <p>Gracias por tu pedido, <span th:text="${pedido.usuario.nombre}">Usuario</span>.</p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Producto</th>
+                    <th>Precio Unitario</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="detalle : ${detalles}">
+                    <td th:text="${detalle.producto.nombre}">Nombre</td>
+                    <td>S/. <span th:text="${detalle.precioUnitario}">0.00</span></td>
+                    <td th:text="${detalle.cantidad}">1</td>
+                    <td>S/. <span th:text="${detalle.subtotal}">0.00</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="text-end mt-3">
+        <h4>Total: <span class="text-primary">S/. <span th:text="${total}">0.00</span></span></h4>
+        <a th:href="@{/productos}" class="btn btn-primary mt-3">← Seguir Comprando</a>
+    </div>
+</section>
+</body>
+</html>
